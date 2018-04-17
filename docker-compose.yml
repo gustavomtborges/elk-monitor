@@ -37,9 +37,22 @@ services:
       - 5000:5000
     networks:
       - elk
-      - webapp
     depends_on:
       - elasticsearch
+
+  filebeat:
+    image: docker.elastic.co/beats/filebeat:6.1.1
+    volumes:
+      - type: bind
+        source: ./filebeat/filebeat.yml
+        target: /usr/share/filebeat/filebeat.yml
+      - type: volume
+        source: beat-logs
+        target: /var/log/
+    networks:
+      - elk
+    depends_on:
+      - logstash
 
   kibana:
     image: docker.elastic.co/kibana/kibana:6.1.1
@@ -56,9 +69,8 @@ services:
 
 volumes:
   esdata1:
+  beat-logs:
 
 networks:
   elk:
-  webapp:
-   external: true
 
