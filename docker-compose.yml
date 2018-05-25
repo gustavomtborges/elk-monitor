@@ -6,11 +6,11 @@ services:
       - cluster.name=docker-cluster
       - xpack.security.enabled=false
       - discovery.type=single-node
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+      - ES_JAVA_OPTS=-Xms256m -Xmx512m
     deploy:
       resources:
         limits:
-          memory: '1G'
+          memory: '512M'
     volumes:
       - type: volume
         source: esdata1
@@ -24,11 +24,11 @@ services:
   logstash:
     image: docker.elastic.co/logstash/logstash:6.2.4
     environment:
-      - LS_JAVA_OPTS=-Xmx512m -Xms512m
+      - LS_JAVA_OPTS=-Xms256m -Xmx512m
     deploy:
       resources:
         limits:
-          memory: '1G'
+          memory: '512M'
     volumes:
       - type: bind
         source: ./logstash/pipeline/
@@ -40,26 +40,12 @@ services:
     depends_on:
       - elasticsearch
 
-  filebeat:
-    image: docker.elastic.co/beats/filebeat:6.2.4
-    volumes:
-      - type: bind
-        source: ./filebeat/filebeat.yml
-        target: /usr/share/filebeat/filebeat.yml
-      - type: volume
-        source: beat-logs
-        target: /var/log/
-    networks:
-      - elk
-    depends_on:
-      - logstash
-
   kibana:
     image: docker.elastic.co/kibana/kibana:6.2.4
     deploy:
       resources:
         limits:
-          memory: '1G'
+          memory: '512M'
     ports:
       - 5601:5601
     networks:
@@ -69,7 +55,6 @@ services:
 
 volumes:
   esdata1:
-  beat-logs:
 
 networks:
   elk:
