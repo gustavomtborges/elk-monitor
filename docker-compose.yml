@@ -1,61 +1,54 @@
-version: '3.5'
+version: '3.6'
 services:
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:6.2.4
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.3.0
     environment:
       - cluster.name=docker-cluster
-      - xpack.security.enabled=false
       - discovery.type=single-node
-      - ES_JAVA_OPTS=-Xms256m -Xmx512m
-    deploy:
-      resources:
-        limits:
-          memory: '512M'
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
     volumes:
       - type: volume
         source: esdata1
         target: /usr/share/elasticsearch/data
     ports:
-      - 9200:9200
-      - 9300:9300
+      - 9200
+      - 9300
     networks:
       - elk
 
   logstash:
-    image: docker.elastic.co/logstash/logstash:6.2.4
-    environment:
-      - LS_JAVA_OPTS=-Xms256m -Xmx512m
-    deploy:
-      resources:
-        limits:
-          memory: '512M'
+    image: docker.elastic.co/logstash/logstash:6.3.0
     volumes:
-      - type: bind
-        source: ./logstash/pipeline/
-        target: /usr/share/logstash/pipeline/
+    - type: bind
+      source: ./logstash/pipeline/
+      target: /usr/share/logstash/pipeline/
     ports:
-      - 5000:5000
+    - 5000
+    - 5000/udp
     networks:
       - elk
-    depends_on:
-      - elasticsearch
 
   kibana:
-    image: docker.elastic.co/kibana/kibana:6.2.4
-    deploy:
-      resources:
-        limits:
-          memory: '512M'
+    image: docker.elastic.co/kibana/kibana:6.3.0
     ports:
       - 5601:5601
     networks:
       - elk
-    depends_on:
-      - elasticsearch
+
+  nginx:
+    image: nginx
+    volumes:
+    - type: bind
+      source: ./nginx/nginx.conf
+      target: /etc/nginx/nginx.conf
+    ports:
+    - 80:80
+    networks:
+    - elk
 
 volumes:
   esdata1:
+  logs:
 
 networks:
   elk:
-
